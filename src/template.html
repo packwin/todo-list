@@ -10,21 +10,23 @@
         <h1>Todo List!</h1>
     </div>
 
-    <div id="projects-div">
-
+    <div id="content">
+        <div id="projects-selection"></div>
+        <div id="selected-proj-info"></div>
+        <div id="todos"></div>
     </div>
 
     <div id="forms">
         <form id="form-new-proj">
             <h3>Add Project</h3>
             <label for="form-proj-title">Title</label>
-            <input id="form-proj-title" name="new-proj-title" value="Hawk">
+            <input id="form-proj-title" name="new-proj-title" value="Project Title">
             <label for="form-proj-desc">Description</label>
-            <input id="form-proj-desc" name="new-proj-desc" value="Tuah">
+            <input id="form-proj-desc" name="new-proj-desc" value='This is a project description for the project "Project Title"'>
             <button id="form-btn-add-proj" type="button">Add New Project</button>
         </form>
         
-        <form id="form-new-todo">
+        <form id="form-new-todo" class="form-close">
             <h3>Add Todo</h3>
             <label for="form-todo-title">Title</label>
             <input id="form-todo-title" name="new-todo-title" value="Todo1">

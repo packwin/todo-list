@@ -8,8 +8,8 @@ body {
     margin: 0;
 
     display: grid;
-    grid-template-columns: 3fr 1fr;
-    grid-template-rows: 2fr 15fr 1fr;
+    grid-template-columns: 5fr 1fr;
+    grid-template-rows: 2fr 20fr 1fr;
 
     min-height: 100vh;
 }
@@ -25,7 +25,11 @@ body {
 
 #forms {
     grid-area: 2 / 2 / 2 / 2;
-    place-self: center;
+    
+    display: flex;
+    flex-flow: column;
+    gap: 1em;
+    align-items: center;
 }
 
 form {
@@ -34,27 +38,77 @@ form {
     align-items: flex-start;
 }
 
-#projects-div {
+#content {
     grid-area: 2 / 1 / 2 / 2;
 
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
-    /* grid-auto-rows: auto; */
-    /* place-items: center; */
+    grid-template-rows: 1fr 2fr 12fr;
+}
+
+#projects-selection {
+    grid-area: 1 / 1 / 1 / 1;
+
+    display: flex;
     gap: 1em;
+    align-items: center;
+}
+
+#selected-proj-info {
+    grid-area: 2 / 1 / 2 / 1;
+}
+
+#todos {
+    grid-area: 3 / 1 / 3 / 1;
+
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.5em;
+
+    overflow: auto;
+}
+
+.entry-card {
+    display: flex;
+    flex-flow: column;
+    padding: 0.5em;
+
+    border: 1px solid black;
 }
 
 .project-container {
-    display: flex;
-    flex-flow: column;
-    align-items: center;
-    
-    min-height: 10vh;
+    grid-area: 2 / 1 / 2 / 1;
 
+    display: flex;
+    flex-flow: row;
+
+    min-height: 10vh;
     box-sizing: border-box;
+
+    border: 1px dashed black;
+}
+
+.project-container h2 {
+    align-self: center;
+    margin-left: 2em;
+    font-size: 3rem;
+}
+
+.project-container h4 {
+    flex-grow: 1;
+    text-align: center;
+    align-self: center;
+}
+
+.project-entries-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
 }
 
 .proj-selected {
+    /* border: 2px solid rgb(255, 225, 0); */
+}
+
+.todo-selected {
     border: 2px solid blue;
 }
 
