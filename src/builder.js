@@ -1,4 +1,4 @@
-export { Builder };
+export { ProjectManager, Project, ProjectNodePair, TodoEntry };
 
 class ProjectManager {
     constructor() {}
@@ -22,15 +22,15 @@ class ProjectManager {
             throw new RangeError(`ProjectManager.setProject(): Index ${index} is out of bounds.`);
         }
 
-        if (!(value instanceof Project)) {
-            throw new TypeError("ProjectManager.setProject(): setProject(value) must be of type \"Project\"!");
+        if (!(value instanceof ProjectNodePair)) {
+            throw new TypeError("ProjectManager.addProject(): addProject(value) must be of type \"ProjectNodePair\"!");
         }
         this.#projects[index] = value;
     }
 
     addProject(value) {
-        if (!(value instanceof Project)) {
-            throw new TypeError("ProjectManager.addProject(): addProject(value) must be of type \"Project\"!");
+        if (!(value instanceof ProjectNodePair)) {
+            throw new TypeError("ProjectManager.addProject(): addProject(value) must be of type \"ProjectNodePair\"!");
         }
 
         this.#projects.push(value);
@@ -49,8 +49,8 @@ class ProjectManager {
 class Project {
     #entries = [];
     
-    constructor(name, desc) {
-        this.name = name;
+    constructor(title, desc) {
+        this.title = title;
         this.desc = desc;
     }
 
@@ -89,11 +89,18 @@ class Project {
     removeEntry(index) {
         this.#entries.splice(index, 1);
     }
+}
 
-    
+class ProjectNodePair {
+    constructor(data, node) {
+        this.data = data;
+        this.selectBtn = node;
+    }
 }
 
 class TodoEntry {
+    #node = null;
+    
     constructor(title, desc, dueDate, priority, subEntries = null) {
         this.title = title;
         this.desc = desc;
@@ -101,6 +108,15 @@ class TodoEntry {
         this.priority = priority;
         this.subEntries = subEntries == null ? null : [...subEntries];
     }
-}
 
-const Builder =  { ProjectManager, Project, TodoEntry };
+    get node() {
+        return this.#node;
+    }
+    set node(value) {
+        if (typeof(value) != HTMLElement) {
+            throw new TypeError("TodoEntry: set node(value) must be of type \"HTMLElement\"!");
+        }
+        
+        this.#node = value;
+    }
+}

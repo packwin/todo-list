@@ -1,117 +1,189 @@
-h1, h2, h3, h4, h5, p {
-    padding: 0;
+* {
+    box-sizing: border-box;
     margin: 0;
+    padding: 0;
+}
+
+button:hover {
+    cursor: pointer;
 }
 
 body {
     padding: 0;
     margin: 0;
-
     display: grid;
-    grid-template-columns: 5fr 1fr;
-    grid-template-rows: 2fr 20fr 1fr;
+    grid-template-columns: 1fr 9fr;
+    grid-template-rows: 1fr 8fr 1fr;
 
-    min-height: 100vh;
+    height: 100vh;
+    max-width: 100vw;
 }
 
 #header {
-    grid-area: 1 / 1 / 1 / 2;
-    border-bottom: 1px solid gray;
-}
+    grid-area: 1 / 1 / 1 / 3;
 
-#header h1 {
-    place-self: center;
-}
+    border-bottom: 1px solid black;
 
-#forms {
-    grid-area: 2 / 2 / 2 / 2;
-    
     display: flex;
-    flex-flow: column;
-    gap: 1em;
+
+    justify-content: center;
     align-items: center;
 }
 
-form {
-    display: flex;
-    flex-flow: column;
-    align-items: flex-start;
-}
-
-#content {
-    grid-area: 2 / 1 / 2 / 2;
-
-    display: grid;
-    grid-template-rows: 1fr 2fr 12fr;
-}
-
-#projects-selection {
-    grid-area: 1 / 1 / 1 / 1;
-
-    display: flex;
-    gap: 1em;
-    align-items: center;
-}
-
-#selected-proj-info {
-    grid-area: 2 / 1 / 2 / 1;
-}
-
-#todos {
-    grid-area: 3 / 1 / 3 / 1;
-
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 0.5em;
+#sidebar {
+    grid-area: 2 / 1 / 3 / 1;
 
     overflow: auto;
-}
 
-.entry-card {
     display: flex;
     flex-flow: column;
-    padding: 0.5em;
 
-    border: 1px solid black;
+    border-right: 1px solid black;
 }
 
-.project-container {
-    grid-area: 2 / 1 / 2 / 1;
-
+#proj-list {
     display: flex;
-    flex-flow: row;
+    flex-flow: column;
 
-    min-height: 10vh;
-    box-sizing: border-box;
-
-    border: 1px dashed black;
-}
-
-.project-container h2 {
-    align-self: center;
-    margin-left: 2em;
-    font-size: 3rem;
-}
-
-.project-container h4 {
-    flex-grow: 1;
-    text-align: center;
-    align-self: center;
-}
-
-.project-entries-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
 }
 
 .proj-selected {
-    /* border: 2px solid rgb(255, 225, 0); */
+    border: 1px dashed gold;
 }
 
-.todo-selected {
-    border: 2px solid blue;
+#new-proj {
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+    margin-top: auto;
+    margin-bottom: 1em;
 }
 
-.form-close {
-    display: none;
+#btn-new-proj {
+    padding: 1em;
+}
+
+#form-new-proj {
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+
+    margin-bottom: 1em;
+}
+
+#form-new-proj input {
+    width: 100%;
+    text-align: center;
+}
+
+#content {
+    grid-area: 2 / 2 / 2 / 2;
+
+    overflow: auto;
+
+    display: grid;
+    grid-template-rows: 1fr 8fr 1fr;
+    grid-template-columns: 100%;
+}
+
+#proj-info {
+    margin: .5em 1em;
+
+    display: flex;
+    flex-flow: column;
+}
+
+#proj-info-desc,
+#proj-info-desc:focus {
+    border: none;
+    outline: none;
+}
+
+#proj-info-desc:focus {
+    color: black;
+}
+
+#todo-list {
+    display: flex;
+    flex-flow: column;
+    padding: 1.5em;
+    gap: 1em;
+
+    overflow: auto;
+    max-height: 100%;
+}
+
+.todo-card {
+    border: 1px solid black;
+
+    display: flex;
+    align-items: center;
+    gap: 1em;
+
+    padding: 1em;
+}
+
+.todo-card-due-date {
+    justify-self: flex-end;
+}
+
+.todo-card-priority {
+    justify-self: flex-end;
+}
+
+
+#add-todo {
+    display: flex;
+}
+
+#input-new-todo {
+    flex-grow: 1;
+
+    padding-left: 2em;
+}
+
+#new-todo-date {
+    display: flex;
+    position: relative;
+}
+
+#input-new-todo-date {
+    position: absolute;
+    right: 50%;
+    opacity: 0;
+    pointer-events: none;
+}
+
+#new-todo-priority {
+    display: flex;
+    flex-flow: column;
+    align-items: stretch;
+}
+
+#new-todo-priority-select {
+    flex-grow: 1;
+    text-align: center;
+}
+
+#new-todo-priority-select:hover {
+    cursor: pointer;
+}
+
+#btn-new-todo {
+    margin-left: auto;
+    padding: 1em 4em;
+}
+
+#footer {
+    grid-area: 3 / 1 / 4 / 3;
+
+    border-top: 1px solid black;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.low-atten {
+    color: lightgray;
 }
