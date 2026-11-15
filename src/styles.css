@@ -47,10 +47,6 @@ body {
 
 }
 
-.proj-selected {
-    border: 1px dashed gold;
-}
-
 #new-proj {
     display: flex;
     flex-flow: column;
@@ -186,4 +182,17 @@ body {
 
 .low-atten {
     color: lightgray;
+}
+
+.proj-selected {
+    border: 1px dashed gold;
+}
+
+.todo-selected {
+    border: 1px dashed blue;
+}
+
+.todo-completed {
+    color: white;
+    background: lightgray;
 }

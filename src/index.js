@@ -1,5 +1,5 @@
 import "./styles.css";
-import { ProjectManager, Project, ProjectNodePair, TodoEntry } from "./builder.js";
+import { ProjectManager, Project, ProjectNodePair, TodoEntry, TodoNodePair } from "./builder.js";
 
 const projManager = new ProjectManager();
 
@@ -65,7 +65,6 @@ btnNewTodo.addEventListener("click", () => {
     }
 
     addTodoCard(new TodoEntry(inputNewTodo.value, "", inputNewTodoDate.value, newTodoPriority.value));
-    console.log(newTodoPriority.value);
 });
 
 const todoList = document.getElementById("todo-list");
@@ -89,9 +88,26 @@ function selectProj(proj) {
     proj.selectBtn.classList.add("proj-selected");
 
     projInfoTitle.textContent = selectedProj.data.title;
-    console.log(selectedProj.data.desc)
     projInfoDesc.value = selectedProj.data.desc === undefined ? projInfoDesc.value : selectedProj.data.desc;
     projInfoDesc.classList.remove("hidden");
+
+    buildProjectTodoCard(selectedProj);
+}
+
+function deselectTodoAll() {
+    selectedProj.data.entries.forEach((entry) => entry.node.card.classList.remove("todo-selected"));
+    selectedTodo = null;
+}
+
+function selectTodo(todo) {
+    if (!todo instanceof TodoNodePair) {
+        throw new TypeError("selectTodo(): todo must be of type \"TodoNodePair\"!");
+    }
+
+    deselectTodoAll();
+
+    selectedTodo = todo;
+    todo.node.card.classList.add("todo-selected");
 }
 
 function updateBtnNewProj() {
@@ -118,23 +134,42 @@ function addNewProject(projTitle) {
 
     projManager.addProject(newProj);
 
-    if (projManager.projects.length === 1) {
-        selectProj(newProj);
-    }
+    selectProj(newProj);
 }
-
-
 
 function addTodoCard(todoEntry) {
     // add todo card to selectedProject
-    selectedProj.data.addEntry(todoEntry);
+    
 
-    todoList.append(createTodoCard(todoEntry));
+    selectedProj.data.addEntry(makeTodoNodePair(todoEntry, createTodoCard(todoEntry)));
+
+
+    // todoList.append(newTodo.node.card);
+}
+
+function makeTodoNodePair(data, node) {
+    const newTodo = new TodoNodePair(data, node);
+
+    newTodo.node.card.addEventListener("click", () => {
+        selectTodo(newTodo);
+    })    
+
+    newTodo.node.checkbox.addEventListener("change", () => {
+        const complete = newTodo.node.checkbox.checked;
+        newTodo.data.completed = complete;
+        newTodo.node.card.classList.toggle("todo-completed", complete);
+    });
+
+    return newTodo;
 }
 
 function createTodoCard(todoEntry) {
     const card = document.createElement("div");
     card.classList.add("todo-card");
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    card.append(checkbox);
 
     const title = document.createElement("h3");
     title.textContent = todoEntry.title;
@@ -155,13 +190,28 @@ function createTodoCard(todoEntry) {
     priority.textContent = todoEntry.priority;
     priority.classList.add("todo-card-priority");
     card.append(priority);
+    
+    const cardObj = {
+        card: card,
+        checkbox: checkbox,
+        title: title,
+        desc: desc,
+        dueDate: dueDate,
+        priority: priority,
+    };
 
-    return card;
+    todoList.append(card);
+
+    return cardObj;
 }
 
 function buildProjectTodoCard(proj) {
     // clear previously open project and build current open project's todo cards
+    todoList.replaceChildren();
 
-    // todos.replaceChildren();
     // proj.data.entries.forEach((todo) => addTodoCard(todo));
+
+    proj.data.entries.forEach((todo) => {
+        todoList.append(todo.node.card);
+    });
 }

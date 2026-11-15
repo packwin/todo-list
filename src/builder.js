@@ -1,4 +1,4 @@
-export { ProjectManager, Project, ProjectNodePair, TodoEntry };
+export { ProjectManager, Project, ProjectNodePair, TodoEntry, TodoNodePair };
 
 class ProjectManager {
     constructor() {}
@@ -34,8 +34,6 @@ class ProjectManager {
         }
 
         this.#projects.push(value);
-
-        console.table(this.#projects);
     }
 
     removeProject(index) {
@@ -78,12 +76,11 @@ class Project {
     }
 
     addEntry(value) {
-        if (!(value instanceof TodoEntry)) {
-            throw new TypeError("Project.addEntry(): entry must be of type \"TodoEntry\"!");
+        if (!(value instanceof TodoNodePair)) {
+            throw new TypeError("Project.addEntry(): entry must be of type \"TodoNodePair\"!");
         }
 
         this.#entries.push(value);
-        console.table(this.#entries);
     }
 
     removeEntry(index) {
@@ -100,7 +97,8 @@ class ProjectNodePair {
 
 class TodoEntry {
     #node = null;
-    
+    #completed = false;
+
     constructor(title, desc, dueDate, priority, subEntries = null) {
         this.title = title;
         this.desc = desc;
@@ -118,5 +116,24 @@ class TodoEntry {
         }
         
         this.#node = value;
+    }
+
+    get completed() {
+        return this.#completed;
+    }
+
+    set completed(value) {
+        if (typeof(value) != "boolean") {
+            throw new TypeError("TodoEntry: set completed(value) must be of type \"Boolean\"!");
+        }
+
+        this.#completed = value;
+    }
+}
+
+class TodoNodePair {
+    constructor(data, node) {
+        this.data = data;
+        this.node = node;
     }
 }
