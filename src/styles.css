@@ -113,18 +113,50 @@ body {
     border: 1px solid black;
 
     display: flex;
-    align-items: center;
+    flex-flow: column;
     gap: 1em;
 
     padding: 1em;
 }
 
-.todo-card-due-date {
-    justify-self: flex-end;
+.todo-card-header-info {
+    display: flex;
+}
+
+.todo-card-header {
+    display: flex;
+    gap: 1em;
+}
+
+.todo-card-info {
+    display: flex;
+    gap: 1em;
+    margin-left: auto;
 }
 
 .todo-card-priority {
     justify-self: flex-end;
+}
+
+.todo-card-prio-crit {
+    background-color: red;
+}
+
+.todo-card-prio-high {
+    background-color: orange;
+}
+
+.todo-card-prio-mod {
+    background-color: yellow;
+}
+
+.todo-card-prio-low {
+    background-color: greenyellow;
+}
+
+
+#todo-list-completed {
+    padding: 2em;
 }
 
 
@@ -132,10 +164,23 @@ body {
     display: flex;
 }
 
+#new-todo-inputs {
+    flex-grow: 1;
+
+    display: flex;
+}
+
 #input-new-todo {
     flex-grow: 1;
 
     padding-left: 2em;
+}
+
+#input-new-todo-desc {
+    flex-grow: 1;
+
+    padding-left: 2em;
+
 }
 
 #new-todo-date {

@@ -46,6 +46,7 @@ inputNewTodoDate.addEventListener("change", () => btnNewTodoDate.textContent = i
 const newTodoPriority = document.getElementById("new-todo-priority-select");
 
 const inputNewTodo = document.getElementById("input-new-todo");
+const inputNewTodoDesc = document.getElementById("input-new-todo-desc");
 
 const btnNewTodo = document.getElementById("btn-new-todo");
 btnNewTodo.addEventListener("click", () => {
@@ -64,10 +65,11 @@ btnNewTodo.addEventListener("click", () => {
         return;
     }
 
-    addTodoCard(new TodoEntry(inputNewTodo.value, "", inputNewTodoDate.value, newTodoPriority.value));
+    addTodoCard(new TodoEntry(inputNewTodo.value, inputNewTodoDesc.value, inputNewTodoDate.value, newTodoPriority.value));
 });
 
 const todoList = document.getElementById("todo-list");
+const todoListCompleted = document.getElementById("todo-list-completed");
 
 window.addEventListener("click", () => {
 
@@ -91,7 +93,7 @@ function selectProj(proj) {
     projInfoDesc.value = selectedProj.data.desc === undefined ? projInfoDesc.value : selectedProj.data.desc;
     projInfoDesc.classList.remove("hidden");
 
-    buildProjectTodoCard(selectedProj);
+    buildProjectTodoCards(selectedProj);
 }
 
 function deselectTodoAll() {
@@ -138,13 +140,7 @@ function addNewProject(projTitle) {
 }
 
 function addTodoCard(todoEntry) {
-    // add todo card to selectedProject
-    
-
     selectedProj.data.addEntry(makeTodoNodePair(todoEntry, createTodoCard(todoEntry)));
-
-
-    // todoList.append(newTodo.node.card);
 }
 
 function makeTodoNodePair(data, node) {
@@ -158,6 +154,24 @@ function makeTodoNodePair(data, node) {
         const complete = newTodo.node.checkbox.checked;
         newTodo.data.completed = complete;
         newTodo.node.card.classList.toggle("todo-completed", complete);
+
+        if (complete) {
+            todoListCompleted.append(newTodo.node.card);
+            todoListCompleted.classList.remove("hidden");
+
+            newTodo.node.title.contentEditable = false;
+            newTodo.node.desc.contentEditable = false;
+        }
+        else {
+            todoList.append(newTodo.node.card);
+            
+            newTodo.node.title.contentEditable = true;
+            newTodo.node.desc.contentEditable = true;
+
+            if (todoListCompleted.childElementCount <= 1) {
+                todoListCompleted.classList.add("hidden");
+            }
+        }
     });
 
     return newTodo;
@@ -167,29 +181,68 @@ function createTodoCard(todoEntry) {
     const card = document.createElement("div");
     card.classList.add("todo-card");
 
+    const headerAndInfoDiv = document.createElement("div");
+    headerAndInfoDiv.classList.add("todo-card-header-info");
+    card.append(headerAndInfoDiv);
+
+    const headerDiv = document.createElement("div");
+    headerDiv.classList.add("todo-card-header");
+    headerAndInfoDiv.append(headerDiv);
+
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
-    card.append(checkbox);
+    headerDiv.append(checkbox);
 
     const title = document.createElement("h3");
     title.textContent = todoEntry.title;
     title.classList.add("todo-card-title");
-    card.append(title);
+    title.contentEditable = true;
+    headerDiv.append(title);
+
+    const infoDiv = document.createElement("div");
+    infoDiv.classList.add("todo-card-info");
+    headerAndInfoDiv.append(infoDiv);
 
     const desc = document.createElement("p");
     desc.textContent = todoEntry.desc;
     desc.classList.add("todo-card-desc");
+    desc.contentEditable = true;
     card.append(desc);
 
     const dueDate = document.createElement("p");
     dueDate.textContent = todoEntry.dueDate;
     dueDate.classList.add("todo-card-due-date");
-    card.append(dueDate);
+    infoDiv.append(dueDate);
 
     const priority = document.createElement("p");
-    priority.textContent = todoEntry.priority;
     priority.classList.add("todo-card-priority");
-    card.append(priority);
+    if (todoEntry.priority == "none" || todoEntry.priority == "") {
+        priority.classList.add("hidden");
+    } else {
+        const priorityText = todoEntry.priority.charAt(0).toUpperCase() + todoEntry.priority.slice(1);
+        priority.textContent = priorityText;
+    
+        switch(todoEntry.priority) {
+            case "critical":
+                priority.classList.add("todo-card-prio-crit");
+                break;
+            case "high":
+                priority.classList.add("todo-card-prio-high");
+                break;
+            case "moderate":
+                priority.classList.add("todo-card-prio-mod");
+                break;
+            case "low":
+                priority.classList.add("todo-card-prio-low");
+                break;
+            default:
+                console.log("DEFAULDTEULDFAFLUT");
+                console.log(priority)
+                break;
+        }
+    } 
+
+    infoDiv.append(priority);
     
     const cardObj = {
         card: card,
@@ -202,16 +255,32 @@ function createTodoCard(todoEntry) {
 
     todoList.append(card);
 
+    btnNewTodoDate.textContent = "Due Date";
+    newTodoPriority.selectedIndex = 0;
+    inputNewTodo.value = "";
+    inputNewTodoDesc.value = "";
+
     return cardObj;
 }
 
-function buildProjectTodoCard(proj) {
+function buildProjectTodoCards(proj) {
     // clear previously open project and build current open project's todo cards
     todoList.replaceChildren();
+    const todoListCompletedSummary = todoListCompleted.querySelector("summary");
+    todoListCompleted.replaceChildren();
 
-    // proj.data.entries.forEach((todo) => addTodoCard(todo));
-
+    todoListCompleted.append(todoListCompletedSummary);
     proj.data.entries.forEach((todo) => {
-        todoList.append(todo.node.card);
+        if(!todo.data.completed) 
+            todoList.append(todo.node.card);
+        else
+            todoListCompleted.append(todo.node.card);
     });
+
+    if (todoListCompleted.childElementCount <= 1) {
+        todoListCompleted.classList.add("hidden");
+    }
+    else {
+        todoListCompleted.classList.remove("hidden");
+    }
 }
