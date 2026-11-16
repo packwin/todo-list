@@ -1,7 +1,45 @@
+@font-face {
+    font-family: "Roboto";
+    src: url(./fonts/Roboto/Roboto-VariableFont_wdth\,wght.ttf);
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Roboto";
+    src: url(./fonts/Roboto/Roboto-Italic-VariableFont_wdth\,wght.ttf);
+    font-style: italic;
+}
+
+@font-face {
+    font-family: "Urbanist";
+    src: url(./fonts/Urbanist/Urbanist-VariableFont_wght.ttf);
+    font-style: normal;
+}
+
+:root {
+    --accent: #e1e1e1;
+}
+
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+    font-family: "Roboto";
+}
+
+input {
+    border: none;
+}
+
+button {
+    border: 1px lightgray;
+    border-radius: 0.5em;
+    box-shadow: 0 2px 3px #7b7b7b;
+    background-color: white;
+}
+
+button:hover {
+    background-color: lightgray;
 }
 
 button:hover {
@@ -25,9 +63,15 @@ body {
     border-bottom: 1px solid black;
 
     display: flex;
-
-    justify-content: center;
     align-items: center;
+    gap: 1em;
+
+    padding-left: 2em;
+}
+
+#header h1 {
+    font-family: "Urbanist";
+    font-size: 2.5rem;
 }
 
 #sidebar {
@@ -39,12 +83,25 @@ body {
     flex-flow: column;
 
     border-right: 1px solid black;
+
+    background-color: var(--accent);
 }
 
 #proj-list {
     display: flex;
     flex-flow: column;
+    gap: 1em;
 
+    padding: .5em;
+}
+
+.btn-proj-switch {
+    padding: 1em;
+}
+
+.proj-selected {
+    background-color: rgb(228, 228, 228);
+    box-shadow: 0 1px 3px #b1b1b1;
 }
 
 #new-proj {
@@ -59,17 +116,40 @@ body {
     padding: 1em;
 }
 
+#btn-new-proj-close {
+    padding: .4em;
+    /* border: none; */
+    /* box-shadow: none; */
+    color: rgb(46, 46, 46);
+}
+
 #form-new-proj {
     display: flex;
     flex-flow: column;
     align-items: center;
+    gap: 1em;
 
-    margin-bottom: 1em;
+    margin-bottom: .5em;
+
+    background-color: var(--accent);
+    
+    border-top: 1px solid gray;
+    /* border-bottom: 1px solid gray; */
+
+    padding: 0.5em 0;
 }
 
-#form-new-proj input {
+#new-proj-input {
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+    padding: 0 0.5em;;
+}
+
+#new-proj-input input {
     width: 100%;
     text-align: center;
+    border: 1px solid lightgray;
 }
 
 #content {
@@ -80,23 +160,47 @@ body {
     display: grid;
     grid-template-rows: 1fr 8fr 1fr;
     grid-template-columns: 100%;
+
+    background-color: var(--accent);
 }
 
 #proj-info {
-    margin: .5em 1em;
+    padding: .5em 1em;
 
     display: flex;
     flex-flow: column;
+
+    background-color: white;
+    border-bottom: 1px solid black;
 }
 
+#proj-info input {
+    background: none;
+}
+
+#proj-info-title,
+#proj-info-title:focus,
 #proj-info-desc,
-#proj-info-desc:focus {
+#proj-info-desc:focus,
+#input-new-todo,
+#input-new-todo:focus,
+#input-new-todo-desc,
+#input-new-todo-desc:focus {
     border: none;
     outline: none;
 }
 
+#proj-info-title {
+    font-size: 2rem;
+}
+
 #proj-info-desc:focus {
     color: black;
+}
+
+#todo-list-container {
+    overflow: auto;
+    max-height: 100%;
 }
 
 #todo-list {
@@ -104,19 +208,27 @@ body {
     flex-flow: column;
     padding: 1.5em;
     gap: 1em;
-
-    overflow: auto;
-    max-height: 100%;
 }
 
 .todo-card {
-    border: 1px solid black;
+    padding: 1em;
 
     display: flex;
     flex-flow: column;
     gap: 1em;
 
-    padding: 1em;
+    background-color: white;
+    border: 1px solid black;
+    border-radius: .7em;
+}
+
+.todo-selected {
+    border: 1px dashed blue;
+}
+
+.todo-completed {
+    color: white;
+    background: rgb(165, 165, 165);
 }
 
 .todo-card-header-info {
@@ -136,6 +248,8 @@ body {
 
 .todo-card-priority {
     justify-self: flex-end;
+    padding: 1em;
+    border-radius: .5em;
 }
 
 .todo-card-prio-crit {
@@ -148,17 +262,69 @@ body {
 
 .todo-card-prio-mod {
     background-color: yellow;
+    color: black;
 }
 
 .todo-card-prio-low {
     background-color: greenyellow;
+    color: black;
 }
 
+
+#todo-list-completed-details {
+    margin: 1.5em;
+    margin-bottom: 0;
+    display: flex;
+    flex-flow: column;
+    gap: 1em;
+
+    border-bottom: 1px solid rgb(113, 113, 113);
+}
+
+#todo-list-completed-details summary {
+    /* align-self: center; */
+    text-align: left;
+
+    position: relative;
+
+    &::marker {
+        content: "";
+    }
+
+    &::before,
+    &::after {
+        content: "";
+        border-block-start: 3px solid rgb(49, 49, 49);
+        height: 0;
+        width: 1rem;
+
+        position: absolute;
+        inset-block-start: 50%;
+        inset-inline-end: 0;
+        translate: 0 -50%;
+    }
+
+    &::after {
+        transform: rotate(90deg);
+        transform-origin: 50%;
+    }
+}
+
+#todo-list-completed-details[open] summary::after {
+    transform: rotate(0deg);
+}
+
+#todo-list-completed-details summary:hover {
+    cursor: pointer;
+}
 
 #todo-list-completed {
-    padding: 2em;
-}
+    display: flex;
+    flex-flow: column;
+    gap: 1em;
 
+    margin-bottom: 1em;
+}
 
 #add-todo {
     display: flex;
@@ -170,17 +336,15 @@ body {
     display: flex;
 }
 
-#input-new-todo {
-    flex-grow: 1;
-
-    padding-left: 2em;
-}
-
+#input-new-todo,
 #input-new-todo-desc {
     flex-grow: 1;
 
-    padding-left: 2em;
+    margin: .5em;
+    padding-left: 1em;
 
+    border-radius: 0.5em;
+    box-shadow: 0 2px 3px #7b7b7b;
 }
 
 #new-todo-date {
@@ -204,6 +368,11 @@ body {
 #new-todo-priority-select {
     flex-grow: 1;
     text-align: center;
+    
+    margin: .5em;
+    border-radius: 0.5em;
+    box-shadow: 0 2px 3px #7b7b7b;
+
 }
 
 #new-todo-priority-select:hover {
@@ -213,6 +382,17 @@ body {
 #btn-new-todo {
     margin-left: auto;
     padding: 1em 4em;
+    margin: .5em;
+}
+
+#btn-new-todo-date {
+    padding: 1em 2em;
+    margin: .5em;
+}
+
+#new-todo-priority-select {
+    border: none;
+    background-color: white;
 }
 
 #footer {
@@ -227,17 +407,4 @@ body {
 
 .low-atten {
     color: lightgray;
-}
-
-.proj-selected {
-    border: 1px dashed gold;
-}
-
-.todo-selected {
-    border: 1px dashed blue;
-}
-
-.todo-completed {
-    color: white;
-    background: lightgray;
 }

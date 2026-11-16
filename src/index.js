@@ -1,7 +1,9 @@
 import "./styles.css";
-import { ProjectManager, Project, ProjectNodePair, TodoEntry, TodoNodePair } from "./builder.js";
+import { ProjectManager, Project, TodoEntry } from "./builder.js";
 
-const projManager = new ProjectManager();
+const projManager = ProjectManager.load();
+
+const cardsByEntry = new Map();
 
 // #region Sidebar
 const projList = document.getElementById("proj-list");
@@ -10,12 +12,13 @@ const formNewProj = document.getElementById("form-new-proj");
 formNewProj.classList.add("hidden");
 
 const newProjTitle = document.getElementById("new-proj-title");
-newProjTitle.addEventListener("change", updateBtnNewProj);
+newProjTitle.addEventListener("input", updateBtnNewProj);
 
 const btnNewProjClose = document.getElementById("btn-new-proj-close");
 btnNewProjClose.addEventListener("click", () => {
     formNewProj.classList.add("hidden");
-    updateBtnNewProj();
+    // updateBtnNewProj();
+    btnNewProjSubmit.textContent = "New Project";
 });
 
 const btnNewProjSubmit = document.getElementById("btn-new-proj");
@@ -25,16 +28,32 @@ btnNewProjSubmit.addEventListener("click", () => {
     formNewProj.classList.remove("hidden");
     updateBtnNewProj();
 
-    if (newProjTitle.value === "") {
-        alert("Please give a title for your new project.");
-        return;
+    
+    if (formOpen) {
+        if (newProjTitle.value === "") {
+            alert("Please give a title for your new project.");
+            return;
+        }
+        addNewProject(newProjTitle.value);
     }
-    if (formOpen) addNewProject(newProjTitle.value);
 });
 
 const projInfoTitle = document.getElementById("proj-info-title");
+projInfoTitle.addEventListener("input", () => {
+    if (selectedProj) {
+        selectedProj.title = projInfoTitle.value;
+        projManager.save();
+        buildProjectButtons();
+    }
+});
 const projInfoDesc = document.getElementById("proj-info-desc");
 projInfoDesc.classList.add("hidden");
+projInfoDesc.addEventListener("input", () => {
+    if (selectedProj) {
+        selectedProj.desc = projInfoDesc.value;
+        projManager.save();
+    }
+});
 
 // #endregion
 
@@ -65,121 +84,89 @@ btnNewTodo.addEventListener("click", () => {
         return;
     }
 
-    addTodoCard(new TodoEntry(inputNewTodo.value, inputNewTodoDesc.value, inputNewTodoDate.value, newTodoPriority.value));
+    const newTodo = new TodoEntry(
+        inputNewTodo.value,
+        inputNewTodoDesc.value,
+        inputNewTodoDate.value,
+        newTodoPriority.value
+    );
+
+    selectedProj.addEntry(newTodo);
+    projManager.save();
+    buildTodoCards();
+
+    btnNewTodoDate.textContent = "Due Date";
+    inputNewTodoDate.value = "";
+    newTodoPriority.selectedIndex = 0;
+    inputNewTodo.value = "";
+    inputNewTodoDesc.value = "";
 });
 
 const todoList = document.getElementById("todo-list");
 const todoListCompleted = document.getElementById("todo-list-completed");
+const todoListCompletedDetails = document.getElementById("todo-list-completed-details");
 
-window.addEventListener("click", () => {
-
+window.addEventListener("click", (e) => {
+    if (e.target.closest(".todo-card")) return;
+    cardsByEntry.get(selectedTodo)?.classList.remove("todo-selected");
+    selectedTodo = null;
+    localStorage.setItem("selectedTodoIndex", -1);
 });
 
 let selectedProj = null;
 let selectedTodo = null;
 
-function deselectProjAll() {
-    projManager.projects.forEach((proj) => proj.selectBtn.classList.remove("proj-selected"));
-    selectedProj = null;
-}
 
 function selectProj(proj) {
-    deselectProjAll();
-
     selectedProj = proj;
-    proj.selectBtn.classList.add("proj-selected");
+    localStorage.setItem("selectedProjIndex", projManager.projects.indexOf(proj));
 
-    projInfoTitle.textContent = selectedProj.data.title;
-    projInfoDesc.value = selectedProj.data.desc === undefined ? projInfoDesc.value : selectedProj.data.desc;
+    selectedTodo = null;
+    localStorage.setItem("selectedTodoIndex", -1);
+
+    projInfoTitle.value = selectedProj.title;
+    projInfoDesc.value = selectedProj.desc ?? "";
     projInfoDesc.classList.remove("hidden");
 
-    buildProjectTodoCards(selectedProj);
+    buildTodoCards();
+    buildProjectButtons();
 }
-
-function deselectTodoAll() {
-    selectedProj.data.entries.forEach((entry) => entry.node.card.classList.remove("todo-selected"));
-    selectedTodo = null;
-}
-
-function selectTodo(todo) {
-    if (!todo instanceof TodoNodePair) {
-        throw new TypeError("selectTodo(): todo must be of type \"TodoNodePair\"!");
-    }
-
-    deselectTodoAll();
-
-    selectedTodo = todo;
-    todo.node.card.classList.add("todo-selected");
+function selectTodo(entry) {
+    cardsByEntry.get(selectedTodo)?.classList.remove("todo-selected");
+    selectedTodo = entry;
+    cardsByEntry.get(entry)?.classList.add("todo-selected");
+    localStorage.setItem("selectedTodoIndex", selectedProj.entries.indexOf(entry));
 }
 
 function updateBtnNewProj() {
-    btnNewProjSubmit.textContent = formNewProj.classList.contains("hidden") ? "New Project" : `Add: "${newProjTitle.value}"`;
+    // btnNewProjSubmit.textContent = formNewProj.classList.contains("hidden") ? "New Project" : `Add: "${newProjTitle.value}"`;
+    btnNewProjSubmit.textContent = "Add Project";
 }
 
 function addNewProject(projTitle) {
-    if (projManager.projects.some((proj) => proj.data.title == projTitle)) {
+    if (projManager.projects.some((proj) => proj.title == projTitle)) {
         alert("You already have a project titled: " + projTitle);
         return;
     }
 
-    const projBtn = document.createElement("button");
-
-    const newProj = new ProjectNodePair(new Project(projTitle), projBtn);
-
-    projBtn.classList.add("btn-proj-switch");
-    projBtn.textContent = projTitle;
-    projBtn.addEventListener("click", () => {
-        selectProj(newProj);
-    });
-
-    projList.append(projBtn);
-
+    const newProj = new Project(projTitle);
     projManager.addProject(newProj);
+    projManager.save();
 
     selectProj(newProj);
 }
 
-function addTodoCard(todoEntry) {
-    selectedProj.data.addEntry(makeTodoNodePair(todoEntry, createTodoCard(todoEntry)));
-}
-
-function makeTodoNodePair(data, node) {
-    const newTodo = new TodoNodePair(data, node);
-
-    newTodo.node.card.addEventListener("click", () => {
-        selectTodo(newTodo);
-    })    
-
-    newTodo.node.checkbox.addEventListener("change", () => {
-        const complete = newTodo.node.checkbox.checked;
-        newTodo.data.completed = complete;
-        newTodo.node.card.classList.toggle("todo-completed", complete);
-
-        if (complete) {
-            todoListCompleted.append(newTodo.node.card);
-            todoListCompleted.classList.remove("hidden");
-
-            newTodo.node.title.contentEditable = false;
-            newTodo.node.desc.contentEditable = false;
-        }
-        else {
-            todoList.append(newTodo.node.card);
-            
-            newTodo.node.title.contentEditable = true;
-            newTodo.node.desc.contentEditable = true;
-
-            if (todoListCompleted.childElementCount <= 1) {
-                todoListCompleted.classList.add("hidden");
-            }
-        }
-    });
-
-    return newTodo;
-}
-
-function createTodoCard(todoEntry) {
+function createTodoCard(entry) {
     const card = document.createElement("div");
     card.classList.add("todo-card");
+    card.classList.toggle("todo-completed", entry.completed);
+    card.classList.toggle("todo-selected", entry === selectedTodo);
+    card.addEventListener("click", () => {
+        if (selectedTodo !== entry) selectTodo(entry);
+    });
+    card.addEventListener("focusin", () => {
+        if (selectedTodo !== entry) selectTodo(entry);
+    })
 
     const headerAndInfoDiv = document.createElement("div");
     headerAndInfoDiv.classList.add("todo-card-header-info");
@@ -194,7 +181,7 @@ function createTodoCard(todoEntry) {
     headerDiv.append(checkbox);
 
     const title = document.createElement("h3");
-    title.textContent = todoEntry.title;
+    title.textContent = entry.title;
     title.classList.add("todo-card-title");
     title.contentEditable = true;
     headerDiv.append(title);
@@ -204,25 +191,25 @@ function createTodoCard(todoEntry) {
     headerAndInfoDiv.append(infoDiv);
 
     const desc = document.createElement("p");
-    desc.textContent = todoEntry.desc;
+    desc.textContent = entry.desc;
     desc.classList.add("todo-card-desc");
     desc.contentEditable = true;
     card.append(desc);
 
     const dueDate = document.createElement("p");
-    dueDate.textContent = todoEntry.dueDate;
+    dueDate.textContent = entry.dueDate;
     dueDate.classList.add("todo-card-due-date");
     infoDiv.append(dueDate);
 
     const priority = document.createElement("p");
     priority.classList.add("todo-card-priority");
-    if (todoEntry.priority == "none" || todoEntry.priority == "") {
+    if (entry.priority == "none" || entry.priority == "") {
         priority.classList.add("hidden");
     } else {
-        const priorityText = todoEntry.priority.charAt(0).toUpperCase() + todoEntry.priority.slice(1);
+        const priorityText = entry.priority.charAt(0).toUpperCase() + entry.priority.slice(1);
         priority.textContent = priorityText;
     
-        switch(todoEntry.priority) {
+        switch(entry.priority) {
             case "critical":
                 priority.classList.add("todo-card-prio-crit");
                 break;
@@ -236,51 +223,74 @@ function createTodoCard(todoEntry) {
                 priority.classList.add("todo-card-prio-low");
                 break;
             default:
-                console.log("DEFAULDTEULDFAFLUT");
-                console.log(priority)
+                console.log("todoEntry priority switch has defaulted.");
                 break;
         }
     } 
-
     infoDiv.append(priority);
     
-    const cardObj = {
-        card: card,
-        checkbox: checkbox,
-        title: title,
-        desc: desc,
-        dueDate: dueDate,
-        priority: priority,
-    };
-
-    todoList.append(card);
-
-    btnNewTodoDate.textContent = "Due Date";
-    newTodoPriority.selectedIndex = 0;
-    inputNewTodo.value = "";
-    inputNewTodoDesc.value = "";
-
-    return cardObj;
-}
-
-function buildProjectTodoCards(proj) {
-    // clear previously open project and build current open project's todo cards
-    todoList.replaceChildren();
-    const todoListCompletedSummary = todoListCompleted.querySelector("summary");
-    todoListCompleted.replaceChildren();
-
-    todoListCompleted.append(todoListCompletedSummary);
-    proj.data.entries.forEach((todo) => {
-        if(!todo.data.completed) 
-            todoList.append(todo.node.card);
-        else
-            todoListCompleted.append(todo.node.card);
+    checkbox.checked = entry.completed;
+    checkbox.addEventListener("change", () => {
+        entry.completed = checkbox.checked;
+        projManager.save();
+        buildTodoCards();
+    });
+    title.addEventListener("input", () => {
+        entry.title = title.textContent;
+        projManager.save();
+    });
+    desc.addEventListener("input", () => {
+        entry.desc = desc.textContent;
+        projManager.save();
     });
 
-    if (todoListCompleted.childElementCount <= 1) {
-        todoListCompleted.classList.add("hidden");
+    return card;
+}
+
+function buildTodoCards() {
+    // clear previously open project and build current open project's todo cards
+    cardsByEntry.clear();
+    
+    todoList.replaceChildren();
+    todoListCompleted.replaceChildren();
+
+    selectedProj.entries.forEach((entry) => {
+        const card = createTodoCard(entry);
+        cardsByEntry.set(entry, card);
+        (entry.completed ? todoListCompleted : todoList).append(card);
+    });
+
+    if (todoListCompleted.childElementCount <= 0) {
+        todoListCompletedDetails.classList.add("hidden");
     }
     else {
-        todoListCompleted.classList.remove("hidden");
+        todoListCompletedDetails.classList.remove("hidden");
     }
 }
+
+function buildProjectButtons() {
+    projList.replaceChildren(...projManager.projects.map((proj) => {
+        const btn = document.createElement("button");
+        btn.classList.add("btn-proj-switch");
+        btn.classList.toggle("proj-selected", proj === selectedProj);
+        btn.textContent = proj.title;
+        btn.addEventListener("click", () => selectProj(proj))
+        return btn;
+    }));
+}
+
+function start() {
+    buildProjectButtons();
+
+    const projIndex = Number(localStorage.getItem("selectedProjIndex"));
+    const todoIndex = localStorage.getItem("selectedTodoIndex");
+
+    const startProj = projManager.projects[projIndex] ?? projManager.projects[0];
+    if (!startProj) return;
+    selectProj(startProj);
+
+    const startTodo = todoIndex === null ? undefined : selectedProj?.entries[Number(todoIndex)];
+    if (startTodo) selectTodo(startTodo);
+}
+
+start();

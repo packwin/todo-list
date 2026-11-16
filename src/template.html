@@ -14,9 +14,10 @@
         <div id="proj-list"></div>
         <div id="new-proj">
             <div id="form-new-proj">
-                <button id="btn-new-proj-close">Close Form</button>
-                <label for="new-proj-title">Title</label>
-                <input id="new-proj-title" name="new-proj-title" value="Project Title">
+                <button id="btn-new-proj-close">✖</button>
+                <div id="new-proj-input">
+                    <input id="new-proj-title" name="new-proj-title" placeholder="Project Title">
+                </div>
             </div>
             <button id="btn-new-proj">New Project</button>
         </div>
@@ -24,15 +25,17 @@
 
     <div id="content">
         <div id="proj-info">
-            <h1 id="proj-info-title"></h1>
+            <label for="proj-info-title"></label>
+            <input id="proj-info-title"></input>
             <label for="proj-info-desc"></label>
             <input id="proj-info-desc" placeholder="Add a description"></h5>
         </div>
         
         <div id="todo-list-container">
             <div id="todo-list"></div>
-            <details id="todo-list-completed" class="hidden">
+            <details id="todo-list-completed-details" class="hidden">
                 <summary>Completed</summary>
+                <div id="todo-list-completed"></div>
             </details>
 
         </div>
